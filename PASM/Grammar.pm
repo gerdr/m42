@@ -7,8 +7,11 @@ token TOP {
 	^ \s*
 	[ <chunk-decl>
 	| <reg-decl>
+	| <op>
+	| <label-decl>
 	|| (\V+) {
-		die "[%s:%i] PANIC: %s\n".sprintf($CURRENT_FILE, $/.Str.lines.Int, $0)
+		die "parse fail in %s:\n[%i] %s\n".sprintf(
+			$CURRENT_FILE, $/.Str.lines.Int, $0)
 	}
 	]* %% <.sep>+ $
 }
@@ -31,9 +34,25 @@ token type {
 
 token name { <.alnum> [ <.alnum> | '_' <![_]> | '.' ]* }
 token reg-name { '%' <.name> }
-token arg-name { '$' <.name> }
+token arg-name { '$' <[0..9]>+ }
+token label { '@' <dot>? <name> }
+token star { '*' }
+token dot { '.' }
 
 token reg-def { <reg-name> [ \h+ '=' \h+ <reg-init=.arg-name> ]? }
 
 token chunk-decl { chunk \h+ <name> }
 token reg-decl { <type> \h+ <reg-def>+ % <.comma> }
+token label-decl { <label> ':' }
+token op { <nullary-op> | <unary-op> | <binary-op> | <ternary-op> }
+token value { <bare-value> | <typed-value> }
+token typed-value { <type> '(' <bare-value> ')' }
+token bare-value { <star>? <reg-name> [ ':' <offset> ]? }
+token offset { <constant> }
+token constant { <sizeof> }
+token sizeof { sizeof '(' <type> ')' }
+
+token nullary-op { <!> }
+token unary-op { $<name>=[ jmp ] \h+ <value> }
+token binary-op { $<name>=[ lea ] \h+ <value>**2 % <.comma> }
+token ternary-op { $<name>=[ add | fadd ] \h+ <value>**3 % <.comma> }

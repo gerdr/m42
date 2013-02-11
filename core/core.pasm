@@ -6,12 +6,12 @@ ptr %pa, %pb
 
 jmp ptr(*%ip)
 
-#@.add_ia:
-#add %ia, %ia, %ib
-#lea %ip, ptr(*%ip:sizeof(reg))
-#jmp ptr(*%ip)
+@.add_ia:
+add %ia, %ia, %ib
+lea %ip, ptr(*%ip:sizeof(reg))
+jmp ptr(*%ip)
 
-#@.add_fa:
-#fadd %fa, %fa, %fb
-#lea %ip, ptr(*%ip:sizeof(reg))
-#jmp ptr(*%ip)
+@.add_fa:
+fadd %fa, %fa, %fb
+lea %ip, ptr(*%ip:sizeof(reg))
+jmp ptr(*%ip)
