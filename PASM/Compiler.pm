@@ -22,11 +22,24 @@ method parse($source, $code) {
 	PASM::Grammar.parse($code, :actions(self))
 }
 
+method reg-decl($/) {
+	die "reg declaration without a chunk"
+		unless defined $!current-chunk;
+
+	sink for callsame.list {
+		my $name = .<name>;
+		die "redeclaration of register \%$name"
+			if $name ~~ $!current-chunk<regs>;
+
+		$!current-chunk<regs>{$name} = $_;
+	}
+}
+
 method op($/) {
-	my $op = callsame;
 	die "op invocation without a chunk"
 		unless defined $!current-chunk;
 
+	my $op = callsame;
 	$!current-chunk<code>.push(:$op.item);
 }
 
@@ -37,7 +50,8 @@ method chunk-decl($/) {
 
 	$!current-chunk = {
 		name => $name,
-		regs => [],
+		regs => {},
+		args => [],
 		code => []
 	};
 

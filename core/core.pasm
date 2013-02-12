@@ -1,7 +1,7 @@
 chunk @parrot2_core
 ptr %ip = $0
 i64 %ia, %ib
-f64 %ia, %ib
+f64 %fa, %fb
 ptr %pa, %pb
 
 jmp ptr(*%ip)
