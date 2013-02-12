@@ -1,17 +1,17 @@
 use v6;
 grammar PASM::Grammar;
 
-our $CURRENT_FILE = '?';
+our $SOURCE = '?';
 
 token TOP {
 	^ \s*
-	[ <chunk-decl>
-	| <reg-decl>
-	| <op>
-	| <label-decl>
+	[ <decl=.chunk-decl>
+	| <decl=.reg-decl>
+	| <decl=.op>
+	| <decl=.label-decl>
 	|| (\V+) {
 		die "parse fail in %s:\n[%i] %s\n".sprintf(
-			$CURRENT_FILE, $/.Str.lines.Int, $0)
+			$SOURCE, $/.Str.lines.Int, $0)
 	}
 	]* %% <.sep>+ $
 }
@@ -33,7 +33,7 @@ token type {
 }
 
 token name { <.alnum> [ <.alnum> | '_' <![_]> | '.' ]* }
-token reg-name { '%' <.name> }
+token reg-name { '%' <name> }
 token arg-name { '$' <[0..9]>+ }
 token label { '@' <dot>? <name> }
 token star { '*' }
@@ -41,11 +41,19 @@ token dot { '.' }
 
 token reg-def { <reg-name> [ \h+ '=' \h+ <reg-init=.arg-name> ]? }
 
-token chunk-decl { chunk \h+ <name> }
+token chunk-decl { chunk \h+ '@' <name> }
 token reg-decl { <type> \h+ <reg-def>+ % <.comma> }
 token label-decl { <label> ':' }
-token op { <nullary-op> | <unary-op> | <binary-op> | <ternary-op> }
-token value { <bare-value> | <typed-value> }
+
+token op {
+	[ <op=.nullary-op>
+	| <op=.unary-op>
+	| <op=.binary-op>
+	| <op=.ternary-op>
+	]
+}
+
+token value { <value=.bare-value> | <value=.typed-value> }
 token typed-value { <type> '(' <bare-value> ')' }
 token bare-value { <star>? <reg-name> [ ':' <offset> ]? }
 token offset { <constant> }
