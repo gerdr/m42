@@ -1,0 +1,29 @@
+type(...) - deref
+
+sugar:
+struct, union, array
+
+i64(%a[%i]) --> i64(%a:%i*sizeof(i64))
+
+struct pair {
+	i64 a
+	i64 b
+}
+
+add %r, :pair(%42).a, :pair(%42).b
+
+struct foo {
+	i64 a[2]
+	i64 b[2]
+}
+
+:foo(%fp).a[1]
+
+---
+
+have argument stack + hash for positional/named args
+multi-dispatcher inspects stack/hash
+after dispatch: move args from stack/hash to lexical env
+
+vm.args.list
+vm.args.hash
