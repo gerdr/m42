@@ -4,14 +4,14 @@ use PASM::Parser;
 role PASM::Compiler is PASM::Parser;
 
 has %.chunks;
-has $.current-chunk;
 has %.labels;
+has $.current-chunk;
 
 method dump { !!! }
 
 method compile($dest, *@sources) {
 	self.parse($_, slurp($_)) for @sources;
-say %!chunks.perl;
+	self.validate;
 	temp $*OUT = open($dest, :w);
 	self.dump;
 	$*OUT.flush;
@@ -20,6 +20,10 @@ say %!chunks.perl;
 method parse($source, $code) {
 	temp $PASM::Grammar::SOURCE = $source;
 	PASM::Grammar.parse($code, :actions(self))
+}
+
+method validate {
+	# TODO
 }
 
 method reg-decl($/) {
@@ -52,28 +56,32 @@ method chunk-decl($/) {
 		name => $name,
 		regs => {},
 		args => [],
-		code => []
+		code => [],
+		labels => [],
 	};
 
 	%!chunks{$name} = $!current-chunk;
 }
 
 method label-decl($/) {
-	my $label = callsame;
 	die "label declaration without a chunk"
 		unless defined $!current-chunk;
 
-	my $name = $label<local>
-		?? $!current-chunk<name> ~ '__' ~ $label<name>
-		!! $label<name>;
+	my $ast = callsame;
+	my $name = $ast<local>
+		?? $!current-chunk<name> ~ '__' ~ $ast<name>
+		!! $ast<name>;
 
 	die "redeclaration of label $name"
 		if $name ~~ %!labels;
 
-	%!labels{$name} = {
+	my $label = {
+		name => $name,
 		chunk => $!current-chunk,
 		offset => +$!current-chunk<code>
 	};
 
-	$!current-chunk<code>.push(:label($name).item);
+	%!labels{$name} = $label;
+	$!current-chunk<labels>.push($label);
+	$!current-chunk<code>.push(:$label.item);
 }

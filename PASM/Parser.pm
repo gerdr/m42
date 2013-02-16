@@ -17,13 +17,14 @@ method label($/) {
 }
 
 method reg-name($/) {
-	make ~$<name>
+	make {
+		sigil => '%',
+		name => ~$<name>
+	}
 }
 
 method reg-def($/) {
-	make {
-		name => $<reg-name>.ast
-	}
+	make $<reg-name>.ast
 }
 
 method reg-decl($/) {
@@ -39,4 +40,29 @@ method op($/) {
 
 method value($/) {
 	make $<value>.ast
+}
+
+method constant($/) {
+	make $<constant>.ast
+}
+
+method sizeof($/) {
+	make :sizeof(~$<type>).item
+}
+
+method number($/) {
+	make :number(~$/).item
+}
+
+method direct-value($/) {
+	make :dv($<value>.ast).item
+}
+
+method indirect-value($/) {
+	make :iv({
+		type => ~$<type>,
+		base => $<reg-name>.ast,
+		index => $<index> ?? $<index>[0].ast !! Nil,
+		multi => :sizeof(~$<type>).item
+	}).item
 }

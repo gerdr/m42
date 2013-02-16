@@ -9,18 +9,17 @@ token TOP {
 	| <decl=.reg-decl>
 	| <decl=.op>
 	| <decl=.label-decl>
-	|| (\V+) {
-		die "parse fail in %s:\n[%i] %s\n".sprintf(
-			$SOURCE, $/.Str.lines.Int, $0)
+	|| (<-[\v\;]>+) {
+		die sprintf "parse fail in %s:\n[%i] %s\n",
+			$SOURCE, $/.Str.lines.Int, $0
 	}
 	]* %% <.sep>+ $
 }
 
 token comment { '#' \V* <.eol> }
-token sep { \h* [ \v | <.comment> ] \h* }
+token sep { \h* [ \v | ';' | <.comment> ] \h* }
 token comma { \h* ',' \h* }
 token eol { \v | $ }
-token alnum { <[a..zA..Z0..9]> }
 
 token type {
 	[ i8 | i16 | i32 | i64
@@ -32,11 +31,10 @@ token type {
 	]
 }
 
-token name { <.alnum> [ <.alnum> | '_' <![_]> | '.' ]* }
+token name { [ [ <[a..zA..Z0..9]>+ ]+ % '_' ]+ % '.' }
 token reg-name { '%' <name> }
 token arg-name { '$' <[0..9]>+ }
 token label { '@' <dot>? <name> }
-token star { '*' }
 token dot { '.' }
 
 token reg-def { <reg-name> [ \h+ '=' \h+ <reg-init=.arg-name> ]? }
@@ -53,14 +51,18 @@ token op {
 	]
 }
 
-token value { <value=.bare-value> | <value=.typed-value> }
-token typed-value { <type> '(' <bare-value> ')' }
-token bare-value { <star>? <reg-name> [ ':' <offset> ]? }
-token offset { <constant> }
-token constant { <sizeof> }
-token sizeof { sizeof '(' <type> ')' }
+token value { <value=.direct-value> | <value=.indirect-value> }
 
-token nullary-op { <!> }
+token indirect-value {
+	<type> '(' \h* <reg-name> [ '[' \h* <index=.constant> \h* ']' ]? \h*')'
+}
+
+token direct-value { <value=.reg-name> }
+token constant { <constant=.sizeof> | <constant=.number> }
+token sizeof { sizeof '(' <type> ')' }
+token number { \d+ }
+
+token nullary-op { $<name>=[ <!> ] }
 token unary-op { $<name>=[ jmp ] \h+ <value> }
 token binary-op { $<name>=[ lea ] \h+ <value>**2 % <.comma> }
 token ternary-op { $<name>=[ add | fadd ] \h+ <value>**3 % <.comma> }
