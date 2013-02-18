@@ -36,6 +36,20 @@ method reg-decl($/) {
 			if $name ~~ $!current-chunk<regs>;
 
 		$!current-chunk<regs>{$name} = $_;
+
+		my $init = .<init>;
+		my $type = .<type>;
+		my @args := $!current-chunk<args>;
+
+		$init and do given $init<sigil> {
+			when '$' {
+				my $index = +$init<name>;
+				@args[$index] //= $type;
+
+				die "argument \$$index redeclared with incompatibe type"
+					if @args[$index] ne $type;
+			}
+		}
 	}
 }
 

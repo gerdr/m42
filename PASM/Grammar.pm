@@ -24,7 +24,7 @@ token eol { \v | $ }
 token type {
 	[ i8 | i16 | i32 | i64
 	| f16 | f32 | f64
-	| ptr | ref | reg
+	| ptr | ref | val
 	| char | int | short | long | llong
 	| float | double | ldouble
 	| size | ptrdiff | intmax | intptr
@@ -33,7 +33,7 @@ token type {
 
 token name { [ [ <[a..zA..Z0..9]>+ ]+ % '_' ]+ % '.' }
 token reg-name { '%' <name> }
-token arg-name { '$' <[0..9]>+ }
+token arg-name { '$' <number> }
 token label { '@' <dot>? <name> }
 token dot { '.' }
 

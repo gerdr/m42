@@ -23,8 +23,18 @@ method reg-name($/) {
 	}
 }
 
+method arg-name($/) {
+	make {
+		sigil => '$',
+		name => ~$<number>
+	}
+}
+
 method reg-def($/) {
-	make $<reg-name>.ast
+	my $def = $<reg-name>.ast;
+	# TODO
+	$def<init> = $<reg-init> ?? $<reg-init>[0].ast !! Nil;
+	make $def;
 }
 
 method reg-decl($/) {
