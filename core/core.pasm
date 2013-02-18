@@ -1,4 +1,4 @@
-chunk @parrot2_core
+chunk @m42_core
 ptr %ip = $0
 i64 %ia, %ib
 f64 %fa, %fb
