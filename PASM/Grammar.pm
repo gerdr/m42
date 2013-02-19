@@ -63,6 +63,6 @@ token sizeof { sizeof '(' <type> ')' }
 token number { \d+ }
 
 token nullary-op { $<name>=[ <!> ] }
-token unary-op { $<name>=[ jmp ] \h+ <value> }
-token binary-op { $<name>=[ lea ] \h+ <value>**2 % <.comma> }
+token unary-op { $<name>=[ jmp | ret ] \h+ <value> }
+token binary-op { $<name>=[ lea | mov ] \h+ <value>**2 % <.comma> }
 token ternary-op { $<name>=[ add | fadd ] \h+ <value>**3 % <.comma> }

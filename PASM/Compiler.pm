@@ -31,6 +31,19 @@ method validate {
 	}
 }
 
+method direct-value($/) {
+	my $value := callsame.value;
+	my $name = $value<name>;
+	given $value<sigil> {
+		when '%' {
+			die "unknow register \%$name"
+				unless $name ~~ $!current-chunk<regs>;
+
+			$value = $!current-chunk<regs>{$name};
+		}
+	}
+}
+
 method reg-decl($/) {
 	die "reg declaration without a chunk"
 		unless defined $!current-chunk;

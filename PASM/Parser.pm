@@ -33,7 +33,7 @@ method arg-name($/) {
 method reg-def($/) {
 	my $def = $<reg-name>.ast;
 	# TODO
-	$def<init> = $<reg-init> ?? $<reg-init>[0].ast !! Nil;
+	$def<init> = $<reg-init>[0].ast if $<reg-init>;
 	make $def;
 }
 
