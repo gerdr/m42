@@ -1,2 +1,4 @@
-/src/core.c
 *.o
+/src/core.c
+/t/*
+!/t/*.c

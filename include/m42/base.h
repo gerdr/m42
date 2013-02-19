@@ -12,6 +12,7 @@ union m42_val_
 	int64_t i;
 	double f;
 	void *p;
+	const void *cp;
 };
 
 #endif
