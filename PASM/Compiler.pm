@@ -23,7 +23,12 @@ method parse($source, $code) {
 }
 
 method validate {
-	# TODO
+	for %!chunks.values -> $chunk {
+		for $chunk<args>.kv -> $index, $type {
+			die "missing argument $index in chunk $chunk<name>"
+				unless $type.defined
+		}
+	}
 }
 
 method reg-decl($/) {
