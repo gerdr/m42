@@ -1,5 +1,5 @@
 use v6;
-grammar PASM::Grammar;
+grammar M42::PASM::Grammar;
 
 our $SOURCE = '?';
 

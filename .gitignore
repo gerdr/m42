@@ -1,1 +1,2 @@
-/core.[co]
+/src/core.c
+*.o

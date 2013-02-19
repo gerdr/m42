@@ -1,5 +1,5 @@
 use v6;
-role PASM::Parser;
+role M42::PASM::Parser;
 
 method chunk-decl($/) {
 	make ~$<name>

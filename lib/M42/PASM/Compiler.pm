@@ -1,7 +1,7 @@
 use v6;
-use PASM::Grammar;
-use PASM::Parser;
-role PASM::Compiler is PASM::Parser;
+use M42::PASM::Grammar;
+use M42::PASM::Parser;
+role M42::PASM::Compiler is M42::PASM::Parser;
 
 has %.chunks;
 has %.labels;
@@ -18,8 +18,8 @@ method compile($dest, *@sources) {
 }
 
 method parse($source, $code) {
-	temp $PASM::Grammar::SOURCE = $source;
-	PASM::Grammar.parse($code, :actions(self))
+	temp $M42::PASM::Grammar::SOURCE = $source;
+	M42::PASM::Grammar.parse($code, :actions(self))
 }
 
 method validate {
