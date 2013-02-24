@@ -1,4 +1,5 @@
 use v6;
+use M42::PASM;
 grammar M42::PASM::Grammar;
 
 our $SOURCE = '?';
@@ -21,15 +22,7 @@ token sep { \h* [ \v | ';' | <.comment> ] \h* }
 token comma { \h* ',' \h* }
 token eol { \v | $ }
 
-token type {
-	[ i8 | i16 | i32 | i64
-	| f16 | f32 | f64
-	| ptr | ref | val
-	| char | int | short | long | llong
-	| float | double | ldouble
-	| size | ptrdiff | intmax | intptr
-	]
-}
+token type { @(M42::PASM::types) }
 
 token name { [ [ <[a..zA..Z0..9]>+ ]+ % '_' ]+ % '.' }
 token reg-name { '%' <name> }
@@ -63,7 +56,7 @@ token constant { <constant=.sizeof> | <constant=.number> }
 token sizeof { sizeof '(' <type> ')' }
 token number { \d+ }
 
-token nullary-op { $<name>=[ <!> ] }
-token unary-op { $<name>=[ jmp | ret ] \h+ <value> }
-token binary-op { $<name>=[ lea | mov ] \h+ <value>**2 % <.comma> }
-token ternary-op { $<name>=[ add | fadd ] \h+ <value>**3 % <.comma> }
+token nullary-op { $<name>=[ @(M42::PASM::ops(0)) ] }
+token unary-op { $<name>=[ @(M42::PASM::ops(1)) ] \h+ <value> }
+token binary-op { $<name>=[ @(M42::PASM::ops(2)) ] \h+ <value>**2 % <.comma> }
+token ternary-op { $<name>=[ @(M42::PASM::ops(3)) ] \h+ <value>**3 % <.comma> }
