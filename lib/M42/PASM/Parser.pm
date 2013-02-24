@@ -30,6 +30,13 @@ method arg-name($/) {
 	}
 }
 
+method struct-name($/) {
+	make {
+		sigil => ':',
+		name => ~$<name>
+	}
+}
+
 method reg-def($/) {
 	my $def = $<reg-name>.ast;
 	# TODO

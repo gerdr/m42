@@ -34,6 +34,7 @@ token type {
 token name { [ [ <[a..zA..Z0..9]>+ ]+ % '_' ]+ % '.' }
 token reg-name { '%' <name> }
 token arg-name { '$' <number> }
+token struct-name { ':' <name> }
 token label { '@' <dot>? <name> }
 token dot { '.' }
 

@@ -1,0 +1,8 @@
+#!/usr/bin/env perl6
+use v6;
+use lib %*ENV<M42LIB> // 'lib';
+use M42::Lila::Compiler::PASM;
+
+multi MAIN($dest, Bool :$pasm!, *@sources) {
+	M42::Lila::Compiler::PASM.new.compile($dest, @sources)
+}

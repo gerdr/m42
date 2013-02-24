@@ -7,7 +7,7 @@ LESS := less
 
 INC := include/m42
 CORE := src/core.o
-PASM := bin/m42-pasm
+PASM := bin/m42-as
 PASMLIBS := \
 	lib/M42/PASM/Grammar.pm \
 	lib/M42/PASM/Parser.pm \

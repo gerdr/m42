@@ -5,14 +5,14 @@ struct, union, array
 
 i64(%a[%i]) --> i64(%a:%i*sizeof(i64))
 
-struct pair {
+struct :pair {
 	i64 a
 	i64 b
 }
 
 add %r, :pair(%42).a, :pair(%42).b
 
-struct foo {
+struct :foo {
 	i64 a[2]
 	i64 b[2]
 }
@@ -27,3 +27,36 @@ after dispatch: move args from stack/hash to lexical env
 
 vm.args.list
 vm.args.hash
+
+---
+
+low-level calling convention + high-level calling convention share stack
+high-level takes arguments from stack after multiple dispatch and moves to heap
+low-level calling convention leaves on stack
+
+---
+
+even low-level is garbage collected! it's good enough for Go, so it's good enough for us
+
+objects are split into header, meta, body
+body can be explicitly destroyed - only header needs to be gc'd
+what to do with meta? refcounted?
+
+---
+
+Lila programming language ("little language")
+all local vars on stack --> val-sized
+
+variable types:
+var - value type
+ptr - pointer type
+def - constant
+ref - dynamically typed reftype
+
+ptr foo = @int(42)
+var bar = 42
+def baz = 42
+ref quux : META = BODY
+
+= sets referenced body
+:= reassigns ref
