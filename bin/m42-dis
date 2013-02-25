@@ -3,6 +3,6 @@ use v6;
 use lib %*ENV<M42LIB> // 'lib';
 use M42::Bytecode;
 
-multi MAIN($source) {
-	M42::Bytecode::parse(slurp($source, :bin)).perl.say
+multi MAIN($bcfile) {
+	M42::Bytecode::parse(slurp($bcfile, :bin)).perl.say
 }

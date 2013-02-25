@@ -1,4 +1,5 @@
 use v6;
+use float16;
 module M42::Bytecode;
 
 enum Args <
@@ -14,8 +15,20 @@ class Parser {
 	has $.buf;
 	has $.pos;
 
+	# big-endian uint
 	method read-uint {
 		$!buf[$!pos++] +< 8 +| $!buf[$!pos++]
+	}
+
+	# two's complement int
+	method read-int {
+		my $bits = self.read-uint;
+		$bits <= 0x7FFF ?? $bits !! $bits - 0x10000
+	}
+
+	# half-precision float
+	method read-float {
+		float16::dec(self.read-uint)
 	}
 
 	method parse-magic {
@@ -40,6 +53,15 @@ class Parser {
 				}
 				when CONSTANT {
 					@args.push(:constant(self.read-uint).item)
+				}
+				when IMM_INT {
+					@args.push(:int(self.read-int).item)
+				}
+				when IMM_FLOAT {
+					@args.push(:float(self.read-float).item)
+				}
+				when IMM_SYMBOL {
+					@args.push(:symbol(self.read-uint).item)
 				}
 				default {
 					die 'unsupported op argument'
