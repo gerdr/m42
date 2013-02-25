@@ -11,61 +11,57 @@ enum Args <
 	IMM_SYMBOL
 >;
 
-class Parser {
-	has $.buf;
-	has $.pos;
+# assumes big-endian byte order
+role Reader {
+	has $!buf;
+	has $!pos;
 
-	# big-endian uint
-	method read-uint {
-		$!buf[$!pos++] +< 8 +| $!buf[$!pos++]
+	submethod BUILD(:$buf, :$pos) {
+		$!buf = $buf;
+		$!pos = $pos;
 	}
 
-	# two's complement int
-	method read-int {
-		my $bits = self.read-uint;
+	method read-byte {
+		$!buf[$!pos++]
+	}
+
+	method read-uint16 {
+		self.read-byte +< 8 +| self.read-byte
+	}
+
+	method read-int16 {
+		my $bits = self.read-uint16;
 		$bits <= 0x7FFF ?? $bits !! $bits - 0x10000
 	}
 
-	# half-precision float
-	method read-float {
-		float16::dec(self.read-uint)
+	method read-float16 {
+		float16::dec(self.read-uint16)
 	}
+}
 
+class Parser does Reader {
 	method parse-magic {
-		unless $!buf[$!pos++] == ord('m')
-			&& $!buf[$!pos++] == 0x42
-			&& $!buf[$!pos++] == 0xBC {
+		unless self.read-byte == ord('m')
+			&& self.read-byte == 0x42
+			&& self.read-byte == 0xBC {
 			take :fail('incorrect magic number').item;
 			last;
 		}
 
-		take :version($!buf[$!pos++]).item;
+		take :version(self.read-byte).item;
 	}
 
 	method parse-op {
-		my $code = $!buf[$!pos++];
-		my $args = $!buf[$!pos++];
-		my @args;
-		while $args > 0 {
-			given $args mod 6 {
-				when REGISTER {
-					@args.push(:register(self.read-uint).item)
-				}
-				when CONSTANT {
-					@args.push(:constant(self.read-uint).item)
-				}
-				when IMM_INT {
-					@args.push(:int(self.read-int).item)
-				}
-				when IMM_FLOAT {
-					@args.push(:float(self.read-float).item)
-				}
-				when IMM_SYMBOL {
-					@args.push(:symbol(self.read-uint).item)
-				}
-				default {
-					die 'unsupported op argument'
-				}
+		my $code = self.read-byte;
+		my $args = self.read-byte;
+		my @args = do gather while $args > 0 {
+			take do given $args mod 6 {
+				when REGISTER { :register(self.read-uint16).item }
+				when CONSTANT { :constant(self.read-uint16).item }
+				when IMM_INT { :int(self.read-int16).item }
+				when IMM_FLOAT { :float(self.read-float16).item }
+				when IMM_SYMBOL { :symbol(self.read-uint16).item }
+				default { die 'unsupported op argument' }
 			}
 			$args div= 6
 		}
