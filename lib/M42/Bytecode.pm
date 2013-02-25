@@ -37,6 +37,19 @@ role Reader {
 	method read-float16 {
 		float16::dec(self.read-uint16)
 	}
+
+	method read-bigint {
+		my $head = self.read-byte;
+		my $sign = $head +> 7;
+		my $count = $head +& 0x7F;
+		my $int = 0;
+		$int = ($int +< 8) +| self.read-byte while $count--;
+		$sign ?? -$int !! $int
+	}
+
+	method read-bigfloat {
+		die 'TODO'
+	}
 }
 
 class Parser does Reader {
