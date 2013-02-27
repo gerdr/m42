@@ -23,7 +23,7 @@ sub op($arity, *@ops) {
 op 0, <noop>;
 op 1, <jmp ret>;
 op 2, <lea mov>;
-op 3, <add fadd>;
+op 3, <add mul fadd fmul>;
 
 %OPS{@OPS} = ^@OPS;
 

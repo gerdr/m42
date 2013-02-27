@@ -12,6 +12,10 @@ my %TYPEMAP =
 		ctype => 'void*',
 		vtype => 'p',
 	},
+	'i8' => {
+		ctype => 'uint8_t',
+		vtype => '-',
+	},
 	'i64' =>  {
 		ctype => 'uint64_t',
 		vtype => 'u',
@@ -23,10 +27,18 @@ my %TYPEMAP =
 	'val' =>  {
 		ctype => 'm42_val',
 		vtype => '-',
-	}
+	},
+	'ptrdiff' => {
+		ctype => 'ptrdiff_t',
+		vtype => 'pd',
+	},
+	'size' => {
+		ctype => 'size_t',
+		vtype => 'sz',
+	},
 ;
 
-multi compile-constant($ (:$key where 'number', :$value)) {
+multi compile-constant($ (:$key where 'integer', :$value)) {
 	$value
 }
 
@@ -49,9 +61,17 @@ multi compile-arg-to-val($arg (:$key where 'dv',
 	"(m42_val)\{ .$vtype = { compile-arg $arg } \}"
 }
 
+multi compile-index($ (:$key where 'register', :$value)) {
+	compile-base $value
+}
+
+multi compile-index($index) {
+	compile-constant $index
+}
+
 multi compile-arg($ (:$key where 'iv', :value($_))) {
 	"(({ %TYPEMAP{.<type>}<ctype> }*){ compile-base .<base> })[{
-		.<index> ?? compile-constant(.<index>) !! 0
+		.<index> ?? compile-index(.<index>) !! 0
 	}]"
 }
 
@@ -77,6 +97,10 @@ multi compile-op($op (:$name where 'mov', *%)) {
 
 multi compile-op($ (:$name where 'add', :@args)) {
 	sprintf '%s = %s + %s;', @args.map(&compile-arg)
+}
+
+multi compile-op($ (:$name where 'mul', :@args)) {
+	sprintf '%s = %s * %s;', @args.map(&compile-arg)
 }
 
 multi compile-op($ (:$name where 'fadd', :@args)) {

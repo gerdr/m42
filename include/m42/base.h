@@ -13,6 +13,8 @@ union m42_val_
 	double f;
 	void *p;
 	const void *cp;
+	ptrdiff_t pd;
+	size_t sz;
 };
 
 #endif

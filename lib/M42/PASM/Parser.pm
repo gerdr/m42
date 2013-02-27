@@ -26,7 +26,7 @@ method reg-name($/) {
 method arg-name($/) {
 	make {
 		sigil => '$',
-		name => ~$<number>
+		name => ~$<integer>
 	}
 }
 
@@ -67,8 +67,14 @@ method sizeof($/) {
 	make :sizeof(~$<type>).item
 }
 
-method number($/) {
-	make :number(~$/).item
+method integer($/) {
+	make :integer(~$/).item
+}
+
+method index($/) {
+	make $<reg-name>
+		?? :register($<index>.ast).item
+		!! $<index>.ast
 }
 
 method direct-value($/) {

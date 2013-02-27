@@ -1,3 +1,9 @@
+add op for sign extension to core
+signx8, signx16, signx32
+converts %ia -> %ia
+
+---
+
 type(...) - deref
 
 sugar:

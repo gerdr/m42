@@ -26,7 +26,7 @@ token type { @(M42::PASM::types) }
 
 token name { [ [ <[a..zA..Z0..9]>+ ]+ % '_' ]+ % '.' }
 token reg-name { '%' <name> }
-token arg-name { '$' <number> }
+token arg-name { '$' <integer> }
 token struct-name { ':' <name> }
 token label { '@' <dot>? <name> }
 token dot { '.' }
@@ -55,13 +55,15 @@ token op {
 token value { <value=.direct-value> | <value=.indirect-value> }
 
 token indirect-value {
-	<type> '(' \h* <reg-name> [ '[' \h* <index=.constant> \h* ']' ]? \h*')'
+	<type> '(' \h* <reg-name> [ '[' \h* <index> \h* ']' ]? \h*')'
 }
 
+token index { <index=.constant> | <index=reg-name> }
+
 token direct-value { <value=.reg-name> }
-token constant { <constant=.sizeof> | <constant=.number> }
+token constant { <constant=.sizeof> | <constant=.integer> }
 token sizeof { sizeof '(' <type> ')' }
-token number { \d+ }
+token integer { \d+ }
 
 token nullary-op { $<name>=[ @(M42::PASM::ops(0)) ] }
 token unary-op { $<name>=[ @(M42::PASM::ops(1)) ] \h+ <value> }
