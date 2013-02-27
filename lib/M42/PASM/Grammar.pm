@@ -37,6 +37,13 @@ token chunk-decl { chunk \h+ '@' <name> }
 token reg-decl { <type> \h+ <reg-def>+ % <.comma> }
 token label-decl { <label> ':' }
 
+token struct-decl {
+	$<declarator>=[ struct | union ] \h+ <struct-name> \h*
+	'{' [ <.sep> | \h+ ]?
+	<XXX>+ % <.sep>
+	[ <.sep> | \h+ ]? '}'
+}
+
 token op {
 	[ <op=.nullary-op>
 	| <op=.unary-op>
