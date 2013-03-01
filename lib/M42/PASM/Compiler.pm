@@ -5,16 +5,19 @@ role M42::PASM::Compiler is M42::PASM::Parser;
 
 has %.chunks;
 has %.labels;
+has %.structs;
 has $.current-chunk;
 
-method dump { !!! }
+method dump { die 'Not implemented' }
 
-method compile($dest, *@sources) {
+method compile(:$dest, *@sources) {
 	self.parse($_, slurp($_)) for @sources;
 	self.validate;
-	temp $*OUT = open($dest, :w);
-	self.dump;
-	$*OUT.flush;
+	if defined $dest {
+		temp $*OUT = open($dest, :w);
+		self.dump;
+		$*OUT.flush;
+	}
 }
 
 method parse($source, $code) {
