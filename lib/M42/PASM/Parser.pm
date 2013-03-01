@@ -56,6 +56,7 @@ method op($/) {
 }
 
 method value($/) {
+	$<value>.ast.value<conv> = $<conv> ?? ~$<conv>[0] !! Nil;
 	make $<value>.ast
 }
 

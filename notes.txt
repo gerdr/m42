@@ -1,6 +1,17 @@
 add op for sign extension to core
 signx8, signx16, signx32
+zerox8, zerox16, zerox32
+trunc8, trunc16, trunc32
+
 converts %ia -> %ia
+
+sx sign-extend
+zx zero-extend
+tr truncate
+fx float-extend
+ft float truncate
+
+add %ia, %ia, sx i32(%pa)
 
 ---
 

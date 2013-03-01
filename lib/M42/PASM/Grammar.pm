@@ -52,7 +52,14 @@ token op {
 	]
 }
 
-token value { <value=.direct-value> | <value=.indirect-value> }
+token conv { sx | zx | tr | fx | ft }
+
+token value {
+	[ <conv> \h+ ]?
+	[ <value=.direct-value>
+	| <value=.indirect-value>
+	]
+}
 
 token indirect-value {
 	<type> '(' \h* <reg-name> [ '[' \h* <index> \h* ']' ]? \h*')'
