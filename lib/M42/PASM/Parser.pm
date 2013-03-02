@@ -1,92 +1,60 @@
 use v6;
-role M42::PASM::Parser;
+use M42::PASM;
+use M42::PASM::Parser::Op;
+use M42::PASM::Parser::Value;
+use M42::PASM::Parser::Chunk;
+use M42::PASM::Parser::Struct;
 
-method chunk-decl($/) {
-	make ~$<name>
+module M42::PASM::Parser;
+
+sub panic($/) {
+	die sprintf "parse fail:\n[%i] %s\n", +$/.Str.lines, ~$0
 }
 
-method label-decl($/) {
-	make $<label>.ast
-}
+grammar Grammar {
+	also does M42::PASM::Parser::Value::Grammar;
+	also does M42::PASM::Parser::Op::Grammar;
+	also does M42::PASM::Parser::Chunk::Grammar;
+	also does M42::PASM::Parser::Struct::Grammar;
 
-method label($/) {
-	make {
-		local => ?$<dot>,
-		name => ~$<name>
+	token TOP {
+		^ <.sep>*
+		[ <decl=.chunk>
+		| <decl=.struct>
+		|| (<-[\v\;]>+) { panic($/) }
+		]* %% <.sep>+ $
 	}
+
+	token comment { '#' \V* <.eol> }
+
+	token sep { \h* [ \v | ';' | <.comment> ] \h* }
+
+	token eol { \v | $ }
+
+	token comma { \h* ',' \h* }
+
+	token dot { '.' }
+
+	token integer { <.digit>+ | 0x <.xdigit>+ }
+
+	token name { [ [ <[a..zA..Z0..9]>+ ]+ % '_' ]+ % '.' }
+
+	token type { @(M42::PASM::types) }
+
+	token register { '%' <name> }
+
+	token global { '@' <name> }
+
+	token usertype { ':' <name> }
+
+	token parameter { '$' $<index>=[ <.digit>+ ] }
 }
 
-method reg-name($/) {
-	make {
-		sigil => '%',
-		name => ~$<name>
-	}
-}
+class Actions {
+	also does M42::PASM::Parser::Value::Actions;
+	also does M42::PASM::Parser::Op::Actions;
+	also does M42::PASM::Parser::Chunk::Actions;
+	also does M42::PASM::Parser::Struct::Actions;
 
-method arg-name($/) {
-	make {
-		sigil => '$',
-		name => ~$<integer>
-	}
-}
-
-method struct-name($/) {
-	make {
-		sigil => ':',
-		name => ~$<name>
-	}
-}
-
-method reg-def($/) {
-	my $def = $<reg-name>.ast;
-	# TODO
-	$def<init> = $<reg-init>[0].ast if $<reg-init>;
-	make $def;
-}
-
-method reg-decl($/) {
-	make [ $<reg-def>>>.ast.map({ .<type> = ~$<type>; $_ }) ]
-}
-
-method op($/) {
-	make {
-		name => ~$<op><name>,
-		args => [ $<op><value>>>.ast ]
-	}
-}
-
-method value($/) {
-	$<value>.ast.value<conv> = $<conv> ?? ~$<conv>[0] !! Nil;
-	make $<value>.ast
-}
-
-method constant($/) {
-	make $<constant>.ast
-}
-
-method sizeof($/) {
-	make :sizeof(~$<type>).item
-}
-
-method integer($/) {
-	make :integer(~$/).item
-}
-
-method index($/) {
-	make $<reg-name>
-		?? :register($<index>.ast).item
-		!! $<index>.ast
-}
-
-method direct-value($/) {
-	make :dv($<value>.ast).item
-}
-
-method indirect-value($/) {
-	make :iv({
-		type => ~$<type>,
-		base => $<reg-name>.ast,
-		index => $<index> ?? $<index>[0].ast !! Nil,
-		multi => :sizeof(~$<type>).item
-	}).item
+	method TOP($/) { make [ $<decl>>>.ast ] }
 }

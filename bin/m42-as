@@ -1,17 +1,18 @@
 #!/usr/bin/env perl6
 use v6;
 use lib %*ENV<M42LIB> // 'lib';
-use M42::PASM::Compiler;
+use M42::PASM::Compiler::AST;
+#use M42::PASM::Compiler::Bytecode;
 use M42::PASM::Compiler::GNUC;
 
-multi MAIN($dest, Bool :$bytecode!, *@sources) {
-	!!!
+multi MAIN(Bool :$ast!, Str :o($dest) = '-', *@sources) {
+	M42::PASM::Compiler::AST.new.compile($dest, @sources)
 }
 
-multi MAIN($dest, Bool :$gnuc!, *@sources) {
-	M42::PASM::Compiler::GNUC.new.compile(:$dest, @sources)
+multi MAIN(Bool :$bytecode!, Str :o($dest)!, *@sources) {
+	M42::PASM::Compiler::Bytecode.new.compile($dest, @sources)
 }
 
-multi MAIN(Bool :$syntax!, *@sources) {
-	M42::PASM::Compiler.new.compile(@sources)
+multi MAIN(Bool :$gnuc!, Str :o($dest) = '-', *@sources) {
+	M42::PASM::Compiler::GNUC.new.compile($dest, @sources)
 }

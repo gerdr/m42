@@ -1,122 +1,42 @@
 use v6;
-use M42::PASM::Grammar;
 use M42::PASM::Parser;
-role M42::PASM::Compiler is M42::PASM::Parser;
+use M42::PASM::ASG;
 
-has %.chunks;
-has %.labels;
+role M42::PASM::Compiler;
+
+has $.grammar = M42::PASM::Parser::Grammar;
+has $.actions = M42::PASM::Parser::Actions;
+
+has @.ast;
+has %.globals;
 has %.structs;
-has $.current-chunk;
 
-method dump { die 'Not implemented' }
-
-method compile(:$dest, *@sources) {
+method compile($dest, *@sources) {
 	self.parse($_, slurp($_)) for @sources;
-	self.validate;
-	if defined $dest {
-		temp $*OUT = open($dest, :w);
-		self.dump;
-		$*OUT.flush;
-	}
+	self.analyze;
+	temp $*OUT = open($dest, :w);
+	self.dump;
+	$*OUT.close;
 }
 
 method parse($source, $code) {
-	temp $M42::PASM::Grammar::SOURCE = $source;
-	M42::PASM::Grammar.parse($code, :actions(self))
+	@!ast.push($!grammar.parse($code, :$!actions).ast.list)
+#	CATCH {}
 }
 
-method validate {
-	for %!chunks.values -> $chunk {
-		for $chunk<args>.kv -> $index, $type {
-			die "missing argument $index in chunk $chunk<name>"
-				unless $type.defined
-		}
-	}
+method analyze {
+	sink self.dispatch($_) for @!ast
 }
 
-method direct-value($/) {
-	my $value := callsame.value;
-	my $name = $value<name>;
-	given $value<sigil> {
-		when '%' {
-			die "unknow register \%$name"
-				unless $name ~~ $!current-chunk<regs>;
+method dump { !!! }
 
-			$value = $!current-chunk<regs>{$name};
-		}
-	}
+method declare($key, $value) {
+	die "redeclaration of global '$key'"
+		if $key ~~ %!globals;
+
+	%!globals{$key} = $value;
 }
 
-method reg-decl($/) {
-	die "reg declaration without a chunk"
-		unless defined $!current-chunk;
-
-	sink for callsame.list {
-		my $name = .<name>;
-		die "redeclaration of register \%$name"
-			if $name ~~ $!current-chunk<regs>;
-
-		$!current-chunk<regs>{$name} = $_;
-
-		my $init = .<init>;
-		my $type = .<type>;
-		my @args := $!current-chunk<args>;
-
-		$init and do given $init<sigil> {
-			when '$' {
-				my $index = +$init<name>;
-				@args[$index] //= $type;
-
-				die "argument \$$index redeclared with incompatibe type"
-					if @args[$index] ne $type;
-			}
-		}
-	}
-}
-
-method op($/) {
-	die "op invocation without a chunk"
-		unless defined $!current-chunk;
-
-	my $op = callsame;
-	$!current-chunk<code>.push(:$op.item);
-}
-
-method chunk-decl($/) {
-	my $name = callsame;
-	die "redeclaration of chunk $name"
-		if $name ~~ %!chunks;
-
-	$!current-chunk = {
-		name => $name,
-		regs => {},
-		args => [],
-		code => [],
-		labels => [],
-	};
-
-	%!chunks{$name} = $!current-chunk;
-}
-
-method label-decl($/) {
-	die "label declaration without a chunk"
-		unless defined $!current-chunk;
-
-	my $ast = callsame;
-	my $name = $ast<local>
-		?? $!current-chunk<name> ~ '__' ~ $ast<name>
-		!! $ast<name>;
-
-	die "redeclaration of label $name"
-		if $name ~~ %!labels;
-
-	my $label = {
-		name => $name,
-		chunk => $!current-chunk,
-		offset => +$!current-chunk<code>
-	};
-
-	%!labels{$name} = $label;
-	$!current-chunk<labels>.push($label);
-	$!current-chunk<code>.push(:$label.item);
+multi method dispatch($ (:key($) where 'chunk', :value($ast))) {
+	M42::PASM::ASG::Chunk.new.init(self, $ast)
 }

@@ -11,8 +11,8 @@ enum Types <
 >;
 
 my @OPS;
-my %OPS;
 my @OPS_BY_ARITY;
+my %OPCODES;
 
 sub op($arity, *@ops) {
 	@OPS.push(@ops);
@@ -25,12 +25,10 @@ op 1, <jmp ret>;
 op 2, <lea mov>;
 op 3, <add mul fadd fmul>;
 
-%OPS{@OPS} = ^@OPS;
+%OPCODES{@OPS} = ^@OPS;
 
 our sub types { Types.enums.keys }
-
-our sub opcode(*@ops) { %OPS{@ops} }
-
+our sub opcode(*@ops) { %OPCODES{@ops} }
 our proto ops(|) { * }
 multi ops($arity) { @OPS_BY_ARITY[$arity] }
 multi ops { @OPS }
