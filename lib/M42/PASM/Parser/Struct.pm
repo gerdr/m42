@@ -6,7 +6,9 @@ role Grammar {
 	token struct { <!> }
 }
 
-role Actions {}
+role AST {}
+
+role ASG {}
 
 #token struct-decl {
 #	$<declarator>=[ struct | union ] \h+ <struct-name> \h*

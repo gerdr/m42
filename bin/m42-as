@@ -2,11 +2,16 @@
 use v6;
 use lib %*ENV<M42LIB> // 'lib';
 use M42::PASM::Compiler::AST;
+use M42::PASM::Compiler::ASG;
 #use M42::PASM::Compiler::Bytecode;
 use M42::PASM::Compiler::GNUC;
 
 multi MAIN(Bool :$ast!, Str :o($dest) = '-', *@sources) {
 	M42::PASM::Compiler::AST.new.compile($dest, @sources)
+}
+
+multi MAIN(Bool :$asg!, Str :o($dest) = '-', *@sources) {
+	M42::PASM::Compiler::ASG.new.compile($dest, @sources)
 }
 
 multi MAIN(Bool :$bytecode!, Str :o($dest)!, *@sources) {

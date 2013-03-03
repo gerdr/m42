@@ -4,49 +4,38 @@ module M42::PASM::Parser::Chunk;
 
 role Grammar {
 	token chunk {
-		chunk \h+ <global> <.sep>+
-		[ <statement=.chunk-reg>
-		| <statement=.chunk-label>
-		| <statement=.op>
-		]+ % <.sep>+
-	}
-
-	token chunk-reg {
-		<type> \h+ <def=.chunk-reg-def>+ % <.comma>
-	}
-
-	token chunk-reg-def {
-		<register> [ \h+ '=' \h+ <init=.parameter> ]?
-	}
-
-	token chunk-label {
-		'@' <dot>? <name> ':'
+		chunk \h+ <global> [
+			<.sep>+
+			[ <statement=.regdecl>
+			| <statement=.label>
+			| <statement=.op>
+			]+ % <.sep>+
+		]?
 	}
 }
 
-role Actions {
+role AST {
 	method chunk($/) {
 		make :chunk({
 			name => ~$<global><name>,
 			statements => [ $<statement>>>.ast ]
 		}).item
 	}
+}
 
-	method chunk-reg($/) {
-		make :reg([ $<def>>>.ast.map({ .<type> = ~$<type>; $_ }) ]).item
-	}
+role ASG {
+	method chunk($/) {
+		my $name = callsame.value<name>;
+		self.cry($<global>, 'global redeclaration')
+			if $name ~~ self.asg.chunks;
 
-	method chunk-reg-def($/) {
-		make {
-			name => ~$<register><name>,
-			init => $<init> ?? :arg(~$<init>[0]<index>).item !! Nil
+		my $chunk = self.asg.chunk;
+		for $chunk.args.kv -> $index, $type {
+			self.cry($/, "missing argument $index")
+				unless defined $type
 		}
-	}
 
-	method chunk-label($/) {
-		make :label({
-			local => ?$<dot>,
-			name => ~$<name>
-		}).item
+		$chunk.name = $name;
+		self.asg.push-chunk;
 	}
 }

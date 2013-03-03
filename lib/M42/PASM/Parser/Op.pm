@@ -1,5 +1,5 @@
 use v6;
-use M42::PASM;
+use M42::PASM::Spec;
 
 module M42::PASM::Parser::Op;
 
@@ -12,37 +12,34 @@ role Grammar {
 		]
 	}
 
-	token op-nullary { $<name>=@(M42::PASM::ops(0)) }
+	token op-nullary { $<name>=@(M42::PASM::Spec::ops(0)) }
 
 	multi token op-multary($n where 1) {
-		$<name>=@(M42::PASM::ops($n)) \h+ <arg=.op-arg>**1 % <.comma>
+		$<name>=@(M42::PASM::Spec::ops($n)) \h+ <arg>**1 % <.comma>
 	}
 
 	multi token op-multary($n where 2) {
-		$<name>=@(M42::PASM::ops($n)) \h+ <arg=.op-arg>**2 % <.comma>
+		$<name>=@(M42::PASM::Spec::ops($n)) \h+ <arg>**2 % <.comma>
 	}
 
 	multi token op-multary($n where 3) {
-		$<name>=@(M42::PASM::ops($n)) \h+ <arg=.op-arg>**3 % <.comma>
+		$<name>=@(M42::PASM::Spec::ops($n)) \h+ <arg>**3 % <.comma>
 	}
-
-	token op-arg { <conv=.op-conv>? <value> }
-
-	token op-conv { sx | zx | tr | fx | ft }
 }
 
-role Actions {
+role AST {
 	method op($/) {
 		make :op({
 			name => ~$<op><name>,
 			args => [ $<op><arg>>>.ast ]
 		}).item
 	}
+}
 
-	method op-arg($/) {
-		make {
-			value => $<value>.ast,
-			conv => $<conv> ?? ~$<conv> !! Nil
-		}
+role ASG {
+	method op($/) {
+		my $name = callsame.value<name>;
+		self.asg.op.name = $name;
+		self.asg.push-op;
 	}
 }

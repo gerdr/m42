@@ -27,7 +27,7 @@ role Grammar {
 	}
 }
 
-role Actions {
+role AST {
 	method value($/) {
 		make $<value>.ast
 	}
@@ -49,3 +49,5 @@ role Actions {
 		make :integer(~$<integer>).item
 	}
 }
+
+role ASG {}

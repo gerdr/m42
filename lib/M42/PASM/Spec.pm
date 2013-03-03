@@ -1,5 +1,5 @@
 use v6;
-module M42::PASM;
+module M42::PASM::Spec;
 
 enum Types <
 	i8 i16 i32 i64
