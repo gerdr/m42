@@ -12,7 +12,7 @@ class M42::PASM::Parser {
 		make $source;
 	}
 
-	multi method compose($/, *%args where 1) {
-		%args.pairs[0]
+	multi method compose($/) {
+		%_.pairs[0]
 	}
 }

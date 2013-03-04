@@ -15,14 +15,22 @@ T_SRC := t/src/core
 T_LIB :=
 GARBAGE := $(CORE) $(CORE:%.o=%.c) $(T_SRC)
 
-.PHONY: build clean check checl-lib check-src dis
+.PHONY: build clean check
+.PHONY: check-lib check-src
+.PHONY: core-ast core-asg core-dis
 
 build: $(CORE)
 
 clean:
 	$(RM) $(GARBAGE)
 
-dis: $(CORE)
+core-ast:
+	$(M42_AS) --ast src/core.pasm | $(LESS)
+
+core-asg:
+	$(M42_AS) --asg src/core.pasm | $(LESS)
+
+core-dis: $(CORE)
 	$(OBJDUMP) -d $< | $(LESS)
 
 check: check-lib check-src

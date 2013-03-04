@@ -13,6 +13,7 @@ role M42::Compiler {
 
 	method parse($source, $code) {
 		self.grammar.parse($code, :actions(self.parser))
+		# $source needs to be added to the error msg
 		# CATCH {}
 	}
 
