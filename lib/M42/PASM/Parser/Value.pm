@@ -11,11 +11,22 @@ role Grammar {
 	}
 
 	token value-indirect {
-		<type> '(' \h* <register> [ '[' \h*
+		<type> '(' \h*
+			<base=.value-base>
+			<subscript=.value-subscript>?
+		\h*')'
+	}
+
+	token value-base {
+		<register=.value-register>
+	}
+
+	token value-subscript {
+		'[' \h*
 		[ <index=.value-integer>
 		| <index=.value-register>
 		]
-		\h* ']' ]? \h*')'
+		\h* ']'
 	}
 
 	token value-register {
@@ -35,10 +46,17 @@ role AST {
 	method value-indirect($/) {
 		make :iv({
 			type => ~$<type>,
-			base => ~$<register><name>,
-			index => $<index> ?? $<index>[0].ast !! Nil,
-			multi => :sizeof(~$<type>).item
+			base => $<base>.ast,
+			subscript => $<subscript> ?? $<subscript>[0].ast !! Nil
 		}).item
+	}
+
+	method value-base($/) {
+		make $<register>.ast
+	}
+
+	method value-subscript($/) {
+		make $<index>.ast
 	}
 
 	method value-register($/) {
@@ -51,29 +69,39 @@ role AST {
 }
 
 role ASG {
+	method value-indirect($/) {
+		my $type = callsame.value<type>;
+		my $iv = self.asg.iv;
+		$iv.type = $type;
+		$iv.offset //= Nil;
+		self.asg.push-iv;
+	}
+
+	method value-base($/) {
+		callsame;
+		self.asg.iv.base = self.asg.pop-value
+	}
+
+	method value-subscript($/) {
+		callsame;
+		self.asg.subscript.index = self.asg.pop-value;
+		self.asg.push-subscript;
+	}
+
 	method value-integer($/) {
-		my $int = callsame.value;
-		my $dv = self.asg.dv;
-		$dv.type = 'integer';
-		$dv.value = +$int;
-		self.asg.push-dv;
+		my $value = callsame.value;
+		my $int = self.asg.int;
+		$int.value = +$value;
+		self.asg.push-int;
 	}
 
 	method value-register($/) {
-		my $reg = callsame.value;
+		my $name = callsame.value;
 		self.cry($/, "unknown register")
-			unless $reg ~~ self.asg.chunk.regs;
+			unless $name ~~ self.asg.chunk.regs;
 
-		my $dv = self.asg.dv;
-		$dv.type = 'register';
-		$dv.value = $reg;
-		self.asg.push-dv;
-	}
-
-	method value-indirect($/) {
-		my $value = callsame.value;
-		my $iv = self.asg.iv;
-		# TODO
-		self.asg.push-iv;
+		my $reg = self.asg.reg;
+		$reg.name = $name;
+		self.asg.push-reg;
 	}
 }
