@@ -74,7 +74,17 @@ class M42::PASM::Backend::GNUC {
 		}), ''
 	}
 
-	my sub blocks($) {}
+	my sub blocks($ (:name($chunk), :%labels, :@ops, :%regs, *%)) {
+		my %map = %labels.values.map({; .offset => .name });
+		@ops.kv.map(-> $offset, $op {
+			my $code = $op.name;
+			if $offset ~~ %map {
+				my $label = "{ $chunk }__{ %map{$offset} }";
+				"\n$label:\n\t__asm__ __volatile__ (\"$label:\");", $code
+			}
+			else { $code }
+		});
+	}
 
 	has $.grammar = M42::PASM::Grammar;
 	has $.parser = M42::PASM::Composer.new;
@@ -160,11 +170,6 @@ class M42::PASM::Backend::GNUC {
 #
 #multi compile-code($ (:key($type) where 'op', :value($op))) {
 #	compile-op $op
-#}
-#
-#multi compile-code($ (:key($type) where 'label', :value($label))) {
-#	my $name = $label<name>;
-#	"\n$name:\n\t__asm__ __volatile__ (\"$name:\");"
 #}
 #
 #multi compile-code($ (:key($type), :$value)) {
