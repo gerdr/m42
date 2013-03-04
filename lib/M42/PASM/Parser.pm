@@ -1,5 +1,6 @@
 use v6;
 use M42::PASM::Spec;
+use M42::PASM::ASG;
 use M42::PASM::Parser::Op;
 use M42::PASM::Parser::Arg;
 use M42::PASM::Parser::Value;
@@ -75,45 +76,6 @@ class AST does Crier {
 	}
 }
 
-class ASG::Chunk {
-	has $.name is rw;
-	has %.regs;
-	has @.args;
-	has @.ops;
-}
-
-class ASG::Op {
-	has $.name is rw;
-	has @.args;
-}
-
-class ASG::Arg {
-	has $.conv is rw;
-	has $.value is rw;
-}
-
-class ASG::World {
-	has %.chunks;
-	has $.chunk = ASG::Chunk.new;
-	has $.op = ASG::Op.new;
-	has $.arg = ASG::Arg.new;
-
-	method push-chunk {
-		%!chunks{$!chunk.name} = $!chunk;
-		$!chunk = ASG::Chunk.new;
-	}
-
-	method push-op {
-		$!chunk.ops.push($!op);
-		$!op = ASG::Op.new;
-	}
-
-	method push-arg {
-		$!op.args.push($!arg);
-		$!arg = ASG::Arg.new;
-	}
-}
-
 class ASG is AST {
 	also does M42::PASM::Parser::Value::ASG;
 	also does M42::PASM::Parser::Op::ASG;
@@ -124,5 +86,5 @@ class ASG is AST {
 	also does M42::PASM::Parser::Source::ASG;
 	also does M42::PASM::Parser::Regdecl::ASG;
 
-	has $.asg = ASG::World.new;
+	has $.asg = M42::PASM::ASG::World.new;
 }

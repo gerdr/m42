@@ -18,6 +18,10 @@ role AST {
 
 role ASG {
 	method arg($/) {
-		callsame
+		my $conv = callsame.value<conv>;
+		my $arg = self.asg.arg;
+		$arg.conv = $conv;
+		$arg.value = self.asg.pop-value;
+		self.asg.push-arg;
 	}
 }
