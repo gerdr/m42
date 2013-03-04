@@ -14,7 +14,7 @@ my @OPS;
 my @OPS_BY_ARITY;
 my %OPCODES;
 
-sub op($arity, *@ops) {
+my sub op($arity, *@ops) {
 	@OPS.push(@ops);
 	@OPS_BY_ARITY[$arity].push(@ops);
 }

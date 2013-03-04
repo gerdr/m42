@@ -1,14 +1,12 @@
 use v6;
 
-module M42::PASM::Parser::Struct;
+module M42::PASM::Node::Struct;
 
 role Grammar {
 	token struct { <!> }
 }
 
-role AST {}
-
-role ASG {}
+role Parser {}
 
 #token struct-decl {
 #	$<declarator>=[ struct | union ] \h+ <struct-name> \h*

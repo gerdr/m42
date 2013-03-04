@@ -1,6 +1,6 @@
 use v6;
 
-module M42::PASM::Parser::Value;
+module M42::PASM::Node::Value;
 
 role Grammar {
 	token value {
@@ -38,7 +38,7 @@ role Grammar {
 	}
 }
 
-role AST {
+role Parser {
 	method value($/) {
 		make $<value>.ast
 	}
@@ -68,40 +68,40 @@ role AST {
 	}
 }
 
-role ASG {
-	method value-indirect($/) {
-		my $type = callsame.value<type>;
-		my $iv = self.asg.iv;
-		$iv.type = $type;
-		$iv.offset //= Nil;
-		self.asg.push-iv;
-	}
-
-	method value-base($/) {
-		callsame;
-		self.asg.iv.base = self.asg.pop-value
-	}
-
-	method value-subscript($/) {
-		callsame;
-		self.asg.subscript.index = self.asg.pop-value;
-		self.asg.push-subscript;
-	}
-
-	method value-integer($/) {
-		my $value = callsame.value;
-		my $int = self.asg.int;
-		$int.value = +$value;
-		self.asg.push-int;
-	}
-
-	method value-register($/) {
-		my $name = callsame.value;
-		self.cry($/, "unknown register")
-			unless $name ~~ self.asg.chunk.regs;
-
-		my $reg = self.asg.reg;
-		$reg.name = $name;
-		self.asg.push-reg;
-	}
-}
+#role ASG {
+#	method value-indirect($/) {
+#		my $type = callsame.value<type>;
+#		my $iv = self.asg.iv;
+#		$iv.type = $type;
+#		$iv.offset //= Nil;
+#		self.asg.push-iv;
+#	}
+#
+#	method value-base($/) {
+#		callsame;
+#		self.asg.iv.base = self.asg.pop-value
+#	}
+#
+#	method value-subscript($/) {
+#		callsame;
+#		self.asg.subscript.index = self.asg.pop-value;
+#		self.asg.push-subscript;
+#	}
+#
+#	method value-integer($/) {
+#		my $value = callsame.value;
+#		my $int = self.asg.int;
+#		$int.value = +$value;
+#		self.asg.push-int;
+#	}
+#
+#	method value-register($/) {
+#		my $name = callsame.value;
+#		self.cry($/, "unknown register")
+#			unless $name ~~ self.asg.chunk.regs;
+#
+#		my $reg = self.asg.reg;
+#		$reg.name = $name;
+#		self.asg.push-reg;
+#	}
+#}

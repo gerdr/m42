@@ -1,7 +1,7 @@
 use v6;
 use M42::PASM::Spec;
 
-module M42::PASM::Parser::Op;
+module M42::PASM::Node::Op;
 
 role Grammar {
 	token op {
@@ -27,19 +27,11 @@ role Grammar {
 	}
 }
 
-role AST {
+role Parser {
 	method op($/) {
-		make :op({
+		make self.compose($/, op => {
 			name => ~$<op><name>,
 			args => [ $<op><arg>>>.ast ]
-		}).item
-	}
-}
-
-role ASG {
-	method op($/) {
-		my $name = callsame.value<name>;
-		self.asg.op.name = $name;
-		self.asg.push-op;
+		})
 	}
 }

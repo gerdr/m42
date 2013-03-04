@@ -1,6 +1,6 @@
 use v6;
 
-module M42::PASM::Parser::Label;
+module M42::PASM::Node::Label;
 
 role Grammar {
 	token label {
@@ -8,18 +8,12 @@ role Grammar {
 	}
 }
 
-role AST {
+role Parser {
 	method label($/) {
-		make :label({
+		make self.compose($/, label => {
 			local => ?$<dot>,
 			name => ~$<name>
-		}).item
-	}
-}
-
-role ASG {
-	method label($/) {
-		callsame
+		})
 	}
 }
 
@@ -42,4 +36,3 @@ role ASG {
 #	$!current-chunk<labels>.push($label);
 #	$!current-chunk<code>.push(:$label.item);
 #}
-

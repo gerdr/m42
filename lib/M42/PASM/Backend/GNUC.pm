@@ -1,10 +1,13 @@
 use v6;
 use M42::Compiler;
-use M42::PASM::Parser;
+use M42::PASM::Grammar;
+use M42::PASM::Composer;
 
-class M42::PASM::Compiler::GNUC does M42::Compiler {
-	has $.grammar = M42::PASM::Parser::Grammar;
-	has $.parser = M42::PASM::Parser::ASG.new;
+class M42::PASM::Backend::GNUC {
+	also does M42::Compiler;
+
+	has $.grammar = M42::PASM::Grammar;
+	has $.parser = M42::PASM::Composer.new;
 
 	method dump { !!! }
 }

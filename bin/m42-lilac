@@ -1,8 +1,7 @@
 #!/usr/bin/env perl6
 use v6;
 use lib %*ENV<M42LIB> // 'lib';
-use M42::Lila::Compiler::AST;
 
 multi MAIN(Bool :$ast!, Str :o($dest) = '-', *@sources) {
-	M42::Lila::Compiler::AST.new.compile($dest, @sources)
+	!!!
 }
