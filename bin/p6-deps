@@ -1,0 +1,26 @@
+#!/usr/bin/env perl6
+use v6;
+
+my %deps;
+
+sub walk($root, $dir) {
+	for dir($dir) {
+		my $path = .path;
+		when .d { walk($root, $path) }
+		when .f && $path ~~ /^(.+)\.pm$/ {
+			my $deps = %deps{"$0.pbc"} = [];
+			for .IO.lines {
+				when /^\s*use\s+(<[\w\:]>+)/ {
+					my $base = $0.subst('::', '/', :g);
+					$deps.push("$root/$base.pbc")
+				}
+			}
+		}
+	}
+}
+
+walk($_, $_) for @*ARGS;
+for %deps.keys {
+	my @deps = %deps{$_}.grep({ $_ ~~ %deps });
+	say "$_: @deps[]" if @deps;
+}

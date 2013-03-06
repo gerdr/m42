@@ -1,4 +1,7 @@
 *.o
+*.pir
+*.pbc
+/deps.mk
 /src/core.c
 /t/src/*
 !/t/src/*.c
