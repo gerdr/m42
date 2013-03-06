@@ -2,7 +2,7 @@ use v6;
 use panic;
 use M42::PASM::Nodes;
 
-my class Chunk {
+my class Chunk is export {
 	has $.name is rw;
 	has %.regs;
 	has @.paras;
@@ -10,20 +10,20 @@ my class Chunk {
 	has @.ops;
 }
 
-my class Reg {
+my class Reg is export {
 	has $.name is rw;
 	has $.type is rw;
 }
 
-my class Regval {
+my class Regval is export {
 	has $.name is rw;
 }
 
-my class Intval {
+my class Intval is export {
 	has $.value is rw;
 }
 
-my class IV {
+my class IV is export {
 	has $.type is rw;
 	has $.base is rw;
 	has $.offset is rw;
@@ -49,26 +49,26 @@ my class IV {
 	}
 }
 
-my class Subscript {
+my class Subscript is export {
 	has $.index is rw;
 }
 
-my class Label {
+my class Label is export {
 	has $.name is rw;
 	has $.offset is rw;
 }
 
-my class Op {
+my class Op is export {
 	has $.name is rw;
 	has @.args;
 }
 
-my class Arg {
+my class Arg is export {
 	has $.conv is rw;
 	has $.value is rw;
 }
 
-my class World {
+my class World is export {
 	has %.globals;
 	has %.chunks;
 }

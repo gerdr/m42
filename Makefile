@@ -41,7 +41,7 @@ check-src: $(T_SRC)
 	t/src/core
 
 $(CORE:%.o=%.c): %.c: %.pasm $(PASM) $(LIBS)
-	$(M42_AS) --gnuc -o $@ $<
+	$(M42_AS) --gnuc -o=$@ $<
 
 $(CORE): %.o: %.c $(INC)/base.h
 	$(GCC) $(GCCFLAGS) -c -o $@ $<
