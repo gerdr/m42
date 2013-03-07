@@ -8,7 +8,7 @@ PERL6 := perl6
 PARROT := parrot
 
 INC := include/m42
-PMS := $(shell find lib -type f)
+PMS := $(shell find lib -name '*.pm')
 CORE := src/core.o
 P6_DEPS := bin/p6-deps
 M42_AS := bin/m42-as

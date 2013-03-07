@@ -20,7 +20,7 @@ sub walk($root, $dir) {
 }
 
 walk($_, $_) for @*ARGS;
-for %deps.keys {
-	my @deps = %deps{$_}.grep({ $_ ~~ %deps });
-	say "$_: @deps[]" if @deps;
+for %deps.kv {
+	my @deps = $^v.grep(%deps);
+	say "$^k: @deps[]" if @deps;
 }
