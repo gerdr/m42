@@ -1,5 +1,6 @@
 use v6;
 use float16;
+use M42::Dumper;
 module M42::Bytecode;
 
 enum Args <
@@ -52,7 +53,12 @@ role Reader {
 	}
 }
 
-class Parser does Reader {
+class Parser {
+	also does Reader;
+	also does M42::Dumper;
+
+	has $.root;
+
 	method parse-magic {
 		unless self.read-byte == ord('m')
 			&& self.read-byte == 0x42
@@ -74,7 +80,7 @@ class Parser does Reader {
 				when IMM_INT { :int(self.read-int16).item }
 				when IMM_FLOAT { :float(self.read-float16).item }
 				when IMM_SYMBOL { :symbol(self.read-uint16).item }
-				default { die 'unsupported op argument' }
+				default { :fail('unsupported op argument').item }
 			}
 			$args div= 6
 		}
@@ -83,11 +89,12 @@ class Parser does Reader {
 	}
 
 	method parse {
-		gather loop {
+		$!root = gather loop {
 			self.parse-magic;
 			self.parse-op;
 			last;
 		}
+		self
 	}
 }
 

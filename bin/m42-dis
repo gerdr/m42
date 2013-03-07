@@ -4,5 +4,5 @@ use lib %*ENV<M42LIB> // 'lib';
 use M42::Bytecode;
 
 multi MAIN($bcfile) {
-	M42::Bytecode::parse(slurp($bcfile, :bin)).perl.say
+	M42::Bytecode::parse(slurp($bcfile, :bin)).dump
 }
