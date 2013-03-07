@@ -16,23 +16,27 @@ M42_DIS := bin/m42-dis
 M42_LILAC := bin/m42-lilac
 T_SRC := t/src/core
 T_LIB :=
-GARBAGE := $(CORE) $(CORE:%.o=%.c) $(T_SRC) deps.mk \
-	$(PMS:%.pm=%.pir) $(PMS:%.pm=%.pbc)
+BACKENDS := lib/M42/PASM/Backends.pbc
+DEPFILE := deps.mk
+GARBAGE := $(CORE) $(CORE:%.o=%.c) $(T_SRC) $(PMS:%.pm=%.pir) $(PMS:%.pm=%.pbc)
 
-.PHONY: build clean check
-.PHONY: check-lib check-src
+.PHONY: build core backends
+.PHONY: clean realclean
+.PHONY: check check-lib check-src
 .PHONY: core-ast core-asg core-dis
 
-build: $(CORE)
+build core: $(CORE)
 
-clean:
+backends: $(BACKENDS)
+
+realclean: GARBAGE += $(DEPFILE)
+clean realclean:
 	$(RM) $(GARBAGE)
 
-core-ast:
-	$(M42_AS) --ast src/core.pasm | $(LESS)
-
-core-asg:
-	$(M42_AS) --asg src/core.pasm | $(LESS)
+core-ast: TARGET := ast
+core-asg: TARGET := asg
+core-ast core-asg: $(BACKENDS)
+	$(M42_AS) --$(TARGET) src/core.pasm | $(LESS)
 
 core-dis: $(CORE)
 	$(OBJDUMP) -d $< | $(LESS)
@@ -44,7 +48,7 @@ check-lib: $(T_LIB)
 check-src: $(T_SRC)
 	t/src/core
 
-$(CORE:%.o=%.c): %.c: %.pasm $(PASM) lib/M42/PASM/Backends.pbc
+$(CORE:%.o=%.c): %.c: %.pasm $(BACKENDS)
 	$(M42_AS) --gnuc -o=$@ $<
 
 $(CORE): %.o: %.c $(INC)/base.h
@@ -58,7 +62,7 @@ $(T_SRC): %: %.c
 	$(PERL6) -Ilib --target=pir --output=$*.pir $*.pm
 	$(PARROT) -o $*.pbc $*.pir
 
-include deps.mk
+include $(DEPFILE)
 
 deps.mk: $(PMS)
 	$(P6_DEPS) lib > $@
