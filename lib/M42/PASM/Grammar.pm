@@ -17,5 +17,6 @@ grammar M42::PASM::Grammar does M42::PASM::Nodes::Grammar {
 	token register { '%' <name> }
 	token global { '@' <name> }
 	token usertype { ':' <name> }
+	token username { '.' <name> }
 	token parameter { '$' <index=.decint> }
 }
